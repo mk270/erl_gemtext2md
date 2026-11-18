@@ -93,7 +93,8 @@ Pin the version and checksum, fetch once, and run it:
 
 ```make
 GEMTEXT2MD_VSN = 0.1.0
-GEMTEXT2MD_URL = https://example.org/gemtext2md/v$(GEMTEXT2MD_VSN)/gemtext2md
+GEMTEXT2MD_REL = https://github.com/mk270/erl_gemtext2md/releases
+GEMTEXT2MD_URL = $(GEMTEXT2MD_REL)/download/v$(GEMTEXT2MD_VSN)/gemtext2md
 GEMTEXT2MD     = _build/tools/gemtext2md-$(GEMTEXT2MD_VSN)
 
 $(GEMTEXT2MD):

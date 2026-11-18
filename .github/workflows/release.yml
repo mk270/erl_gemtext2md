@@ -1,0 +1,53 @@
+name: release
+
+# Build the escript and attach it, with its sha256, to a GitHub release.
+# Runs when a v* tag is pushed, or by hand from the Actions tab (give the
+# tag to build as the input).
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Existing tag to build and release (e.g. v0.1.0)'
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    env:
+      TAG: ${{ github.event.inputs.tag || github.ref_name }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.TAG }}
+
+      # Build on the lowest supported OTP (minimum_otp_vsn in
+      # rebar.config): an escript runs on that OTP or a newer one.
+      - uses: erlef/setup-beam@v1
+        with:
+          otp-version: '27'
+          rebar3-version: '3'
+
+      - run: rebar3 eunit
+
+      - run: make release
+
+      - name: Collect the release files
+        run: |
+          mkdir -p dist
+          cp _build/default/bin/gemtext2md dist/gemtext2md
+          cd dist
+          sha256sum gemtext2md > gemtext2md.sha256
+          cat gemtext2md.sha256
+
+      - uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ env.TAG }}
+          files: |
+            dist/gemtext2md
+            dist/gemtext2md.sha256

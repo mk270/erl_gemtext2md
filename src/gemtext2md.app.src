@@ -1,6 +1,6 @@
 {application, gemtext2md,
  [{description, "Gemini text to Markdown converter"},
-  {vsn, "0.1.0"},
+  {vsn, "0.1.1"},
   {registered, []},
   {applications,
    [kernel,
@@ -13,5 +13,6 @@
              gemtext2md_cli
             ]},
   {licenses, ["Apache 2.0"]},
-  {links, []}
+  {links, [{"GitHub",
+           "https://github.com/mk270/erl_gemtext2md"}]}
  ]}.
