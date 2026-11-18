@@ -1,0 +1,17 @@
+{application, gemtext2md,
+ [{description, "Gemini text to Markdown converter"},
+  {vsn, "0.1.0"},
+  {registered, []},
+  {applications,
+   [kernel,
+    stdlib,
+    gemini_text
+   ]},
+  {env, []},
+  {modules, [
+             gemtext2md,
+             gemtext2md_cli
+            ]},
+  {licenses, ["Apache 2.0"]},
+  {links, []}
+ ]}.

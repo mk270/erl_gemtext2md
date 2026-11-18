@@ -1,0 +1,8 @@
+{"1.2.0",
+[{<<"gemini_text">>,{pkg,<<"gemini_text">>,<<"3.0.2">>},0}]}.
+[
+{pkg_hash,[
+ {<<"gemini_text">>, <<"74071B8FA6187EA5506B4DFE1A850F4DA9E8B23F17D3FA5E8A24AF52A7F8237A">>}]},
+{pkg_hash_ext,[
+ {<<"gemini_text">>, <<"609AB6779EE116FE4FCB27D208619A81C1EDB674F41557620D33F7AD87EC5A8A">>}]}
+].
