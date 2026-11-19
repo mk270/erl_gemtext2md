@@ -1,16 +1,52 @@
-%% gemtext2md: convert Gemini text to Markdown.
-%%
-%% The conversion follows the Rust gemtext2md: consecutive links, list
-%% items and quote lines are grouped into one block each.  The
-%% streaming API (new/0, convert/2, finish/1) sits on gemini_text's
-%% streaming parser.  A group is written out when an element that does
-%% not belong to it arrives, or at finish/1.
-
 -module(gemtext2md).
+
+-moduledoc """
+Convert Gemini text (gemtext) to Markdown.
+
+Parsing is done by `m:gemini_text`. The conversion follows the Rust
+`gemtext2md`:
+
+- headings keep their level, and text lines become paragraphs;
+- a link becomes `* [label](URL)`, or `* [URL](URL)` without a label;
+- a list item becomes `- item`;
+- a quote line becomes `> text`, with a bare `>` line between the lines
+  of a quote block, so each stays its own paragraph;
+- a preformatted block becomes a fenced block, keeping its alt text.
+
+Consecutive links, list items or quote lines form one block. A blank
+line, or any other kind of line, ends it. Each block is followed by one
+blank line.
+
+The input must be UTF-8; transcode anything else first. Control
+characters are passed through, so sanitise the result before display
+if the source is untrusted.
+
+There are two ways in. `convert/1` takes a whole document. `new/0`,
+`convert/2` and `finish/1` take it in pieces, which may be split
+anywhere:
+
+```erlang
+C0 = gemtext2md:new(),
+{ok, Out1, C1} = gemtext2md:convert(Chunk1, C0),
+{ok, Out2, C2} = gemtext2md:convert(Chunk2, C1),
+{ok, Out3} = gemtext2md:finish(C2).
+```
+
+Write the outputs in order. A link, list or quote group is held back
+until it ends, and a preformatted block until its closing fence, so
+`finish/1` may return output too. After an error no context is
+returned, so a broken stream cannot be continued.
+
+Errors are those of `gemini_text:parse/1`: `{Reason, LineNumber}`, for
+example `{invalid_utf8, 3}`.
+""".
 
 -export([convert/1, new/0, convert/2, finish/1, render/1]).
 -export_type([context/0]).
 
+-doc """
+The state of a streaming conversion, made by `new/0`.
+""".
 -opaque context() :: {gemini_text:context(), group()}.
 
 -type group() :: none
@@ -18,7 +54,12 @@
                | {list, [binary()]}
                | {quote, [binary()]}.
 
-%% Convert a whole document.
+-doc """
+Convert a whole document to Markdown.
+
+Returns `{ok, Markdown}` or `{error, {Reason, LineNumber}}`, for
+example `{error, {invalid_utf8, 3}}`.
+""".
 -spec convert(Text) -> Result
     when Text   :: binary(),
          Result :: {ok, iodata()} | {error, gemini_text:parse_error()}.
@@ -28,11 +69,19 @@ convert(Text) ->
         {error, _} = E -> E
     end.
 
+-doc """
+Start a streaming conversion.
+""".
 -spec new() -> context().
 new() ->
     {gemini_text:new_context(), none}.
 
-%% Feed a chunk; output is returned as soon as it is available.
+-doc """
+Feed a chunk of input, which may end anywhere in a line.
+
+Returns the Markdown that is complete so far, and the new context. The
+errors are those of `convert/1`; after one, no context is returned.
+""".
 -spec convert(Chunk, Ctx) -> Result
     when Chunk  :: binary(),
          Ctx    :: context(),
@@ -47,6 +96,11 @@ convert(Chunk, {PCtx, Group}) ->
             E
     end.
 
+-doc """
+End the input, returning any Markdown still held back: an unterminated
+last line, a group still open, or a preformatted block that was never
+closed. The errors are those of `convert/1`.
+""".
 -spec finish(Ctx) -> Result
     when Ctx    :: context(),
          Result :: {ok, iodata()} | {error, gemini_text:parse_error()}.
@@ -59,7 +113,9 @@ finish({PCtx, Group}) ->
             E
     end.
 
-%% Render a whole list of parsed elements as Markdown.
+-doc """
+Render elements already parsed by `gemini_text:parse/1` as Markdown.
+""".
 -spec render(Elements) -> iodata()
     when Elements :: [gemini_text:tagged_line()].
 render(Elements) ->

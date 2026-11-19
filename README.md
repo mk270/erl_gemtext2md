@@ -85,7 +85,9 @@ make release
 ```
 
 This runs `rebar3 escriptize` and prints the sha256 of
-`_build/default/bin/gemtext2md`.
+`_build/default/bin/gemtext2md`. Rebuilds of the same source give
+different checksums; see [CHECKSUMS.md](CHECKSUMS.md) before cutting a
+release.
 
 ### Using a released escript in another project's build
 
@@ -117,7 +119,13 @@ of halting.
 ```
 rebar3 eunit
 rebar3 dialyzer
+rebar3 ex_doc
 ```
+
+The documentation is written as `-moduledoc` and `-doc` attributes, so
+OTP 27 or later is required. `rebar3 ex_doc` writes HTML to `doc/`; it
+needs an OTP release that the ex_doc build supports (27, or 28.1 and
+later).
 
 ## Licence
 

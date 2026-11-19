@@ -1,19 +1,41 @@
-%% gemtext2md_cli: command line front end, also the escript entry point.
-%%
-%% Usage: gemtext2md [FILE | -]   (no argument or "-" reads stdin)
-
 -module(gemtext2md_cli).
+
+-moduledoc """
+The command line front end of `m:gemtext2md`, and the entry point of the
+`gemtext2md` escript.
+
+    gemtext2md [FILE | -]
+
+With no argument, or with `-`, it reads standard input; with one
+argument it reads that file. Markdown goes to standard output. On
+failure it prints `gemtext2md: MESSAGE` to standard error and exits
+with status 1.
+
+Input is read in chunks and passed to the streaming API of
+`m:gemtext2md`, as raw bytes, so that invalid UTF-8 is reported rather
+than silently re-encoded.
+""".
 
 -export([main/1, run/2]).
 
 -define(CHUNK, 65536).
 
+-doc """
+The escript entry point: runs on the command line arguments and halts
+with the exit status of `run/2`.
+""".
 -spec main([string()]) -> no_return().
 main(Args) ->
     ok = io:setopts(standard_io, [binary, {encoding, latin1}]),
     halt(run(Args, standard_io)).
 
-%% Returns the exit status; output goes to Out.
+-doc """
+Run on a list of arguments (see the module description), writing the
+Markdown to `Out`.
+
+Returns the exit status, 0 or 1, instead of halting, so that it can be
+used from other code.
+""".
 -spec run(Args, Out) -> non_neg_integer()
     when Args :: [string()],
          Out  :: io:device().

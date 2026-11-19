@@ -1,6 +1,6 @@
 {application, gemtext2md,
  [{description, "Gemini text to Markdown converter"},
-  {vsn, "0.1.1"},
+  {vsn, "0.1.2"},
   {registered, []},
   {applications,
    [kernel,
