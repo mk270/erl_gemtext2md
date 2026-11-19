@@ -129,4 +129,5 @@ later).
 
 ## Licence
 
-Apache 2.0.
+Apache-2.0 (SPDX identifier); see the `licenses` entry in
+`src/gemtext2md.app.src`.
